@@ -66,7 +66,7 @@ export default function Hero({ datosGenerales }) {
           // className="font-sans text-xs tracking-[0.4em] text-terracotta uppercase"
           className="font-sans text-xs tracking-[0.4em] text-gold uppercase [text-shadow:0_2px_10px_rgba(0,0,0,0.45)]"
         >
-          Nos casamos
+          Nos casamos 
         </motion.p>
         {/* 
         <motion.p
