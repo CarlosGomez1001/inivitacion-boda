@@ -1,7 +1,7 @@
 const dataBoda = {
     datosGenerales: {
-        nombreNovio: "Andrea",
-        nombreNovia: "Axel",
+        nombreNovia: "Andrea",
+        nombreNovio: "Axel",
         fechaBoda: "2026-11-21",
         lugarCeremonia: "Iglesia San Juan",
         lugarRecepcion: "Salón de Eventos La Hacienda"

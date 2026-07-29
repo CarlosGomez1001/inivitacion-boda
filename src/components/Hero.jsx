@@ -16,13 +16,14 @@ export default function Hero({ datosGenerales }) {
   return (
     <section
       id="inicio"
-      className="relative flex min-h-[92vh] flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-blush-dark to-blush px-6 text-center"
+      className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-blush-dark to-blush px-6 text-center"
     >
       <div
-        className="absolute inset-0 bg-cover bg-center"
+        className="absolute inset-0 bg-cover bg-position-[30%_0px] md:bg-center"
+        // className="absolute inset-0 bg-cover bg-right md:bg-center"
         style={{ backgroundImage: `url(${fondoNovios})` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/30 to-charcoal/10" />
+      <div className="absolute inset-0 bg-linear-to-t from-charcoal/80 via-charcoal/20 to-charcoal/10" />
       <div className="absolute inset-0 bg-terracotta-dark/15 mix-blend-multiply" />
 
       {/* <div
