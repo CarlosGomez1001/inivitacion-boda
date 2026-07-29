@@ -11,6 +11,7 @@ import Rsvp from "./components/Rsvp";
 import Footer from "./components/Footer";
 import Reveal from "./components/Reveal";
 import { buildEventDates } from "./utils/eventLinks";
+import marcobottom from "./assets/marcobottom.png";
 
 function App() {
   const { datosGenerales, itinerario } = dataBoda;
@@ -26,9 +27,19 @@ function App() {
 
       <Hero datosGenerales={datosGenerales} />
 
-      <section className="bg-blush px-6 py-20 text-center">
+      <section className="bg-blush px-1 py-1 text-center">
+        <div
+          className="z-20 w-full bg-blush-dark/20 "
+        // style={{ clipPath: PICADO_CLIP_PATH }}
+        >
+          <img
+            src={marcobottom}
+            alt=""
+            className="mx-auto w-full max-w-2xl rotate-180 select-none"
+          />
+        </div>
         <Reveal>
-          <p className="font-sans text-xs tracking-[0.3em] text-terracotta uppercase">
+          <p className="font-sans mt-4 text-xs tracking-[0.3em] text-terracotta uppercase">
             Cuenta regresiva
           </p>
           <h2 className="mt-3 mb-10 font-serif text-3xl text-charcoal sm:text-4xl">

@@ -3,11 +3,25 @@ import { formatFechaLarga } from "../utils/formatDate";
 // import fondoNovios from "../assets/Principal_novios.png";
 import fondoNovios from "../assets/main-image.jpeg";
 import marcobottom from "../assets/marcobottom.png";
+import Navbar from "./Navbar";
+import Navbar_v2 from "./Navbar_v2";
 
 const PICADO_TEETH = 36;
 const PICADO_CLIP_PATH = `polygon(0% 0%, 100% 0%, ${Array.from(
   { length: PICADO_TEETH + 1 },
   (_, i) => `${100 - (i / PICADO_TEETH) * 100}% ${i % 2 === 0 ? 100 : 96}%`
+).join(", ")})`;
+
+const CONCAVE_POINTS = 70;
+const CONCAVE_DEPTH = 70; // % of height the center scoops upward
+const CONCAVE_BOTTOM_CLIP_PATH = `polygon(0% 0%, 100% 0%, ${Array.from(
+  { length: CONCAVE_POINTS + 1 },
+  (_, i) => {
+    const x = 100 - (i / CONCAVE_POINTS) * 100;
+    const t = (x - 50) / 50;
+    const y = 100 - CONCAVE_DEPTH * Math.sqrt(Math.max(0, 1 - t * t));
+    return `${x}% ${y}%`;
+  }
 ).join(", ")})`;
 
 export default function Hero({ datosGenerales }) {
@@ -28,16 +42,16 @@ export default function Hero({ datosGenerales }) {
       {/* <div className="absolute inset-0 bg-terracotta-dark/15 mix-blend-multiply" /> */}
       <div className="absolute inset-0 " />
 
-      <div
+      {/* <div
         className="absolute top-0 left-0 z-20 w-full bg-blush-dark/90 "
-        // style={{ clipPath: PICADO_CLIP_PATH }}
+        style={{ clipPath: CONCAVE_BOTTOM_CLIP_PATH }}
       >
         <img
           src={marcobottom}
           alt=""
           className="mx-auto w-full max-w-2xl rotate-180 select-none"
         />
-      </div>
+      </div> */}
 
       <div className="relative z-10 flex flex-col items-center">
 
@@ -91,6 +105,7 @@ export default function Hero({ datosGenerales }) {
           {formatFechaLarga(fechaBoda)}
         </motion.p> */}
       </div>
+      <Navbar_v2 />
     </section>
   );
 }
