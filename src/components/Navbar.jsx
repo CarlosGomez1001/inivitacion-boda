@@ -27,15 +27,18 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 z-50 w-full bg-blush/95 shadow-sm backdrop-blur transition-transform duration-300 ${
+      // className={`fixed top-0 left-0 z-50 w-full bg-blush/95 shadow-sm backdrop-blur transition-transform duration-300 ${
+      className={`fixed top-0 left-0 z-50 w-full bg-[#CD3F72] shadow-sm backdrop-blur transition-transform duration-300 ${
         visible ? "translate-y-0" : "-translate-y-full"
       }`}
     >
       <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-        <a href="#inicio" className="font-serif text-lg tracking-wide text-terracotta">
+        {/* <a href="#inicio" className="font-serif text-lg tracking-wide text-terracotta"> */}
+        <a href="#inicio" className="font-serif text-lg tracking-wide text-amber-300">
           A &amp; A
         </a>
 
+        {/* <ul className="hidden gap-8 font-sans text-xs tracking-[0.2em] text-charcoal uppercase md:flex"> */}
         <ul className="hidden gap-8 font-sans text-xs tracking-[0.2em] text-charcoal uppercase md:flex">
           {LINKS.map((link) => (
             <li key={link.id}>
@@ -47,7 +50,7 @@ export default function Navbar() {
         </ul>
 
         <button
-          className="text-charcoal md:hidden"
+          className="text-amber-300 md:hidden"
           aria-label="Abrir menú"
           onClick={() => setOpen((v) => !v)}
         >

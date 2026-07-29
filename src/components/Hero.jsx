@@ -16,26 +16,28 @@ export default function Hero({ datosGenerales }) {
   return (
     <section
       id="inicio"
-      className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-blush-dark to-blush px-6 text-center"
+      className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-linear-to-b from-blush-dark to-blush px-6 text-center"
     >
       <div
         className="absolute inset-0 bg-cover bg-position-[30%_0px] md:bg-center"
         // className="absolute inset-0 bg-cover bg-right md:bg-center"
         style={{ backgroundImage: `url(${fondoNovios})` }}
       />
-      <div className="absolute inset-0 bg-linear-to-t from-charcoal/80 via-charcoal/20 to-charcoal/10" />
-      <div className="absolute inset-0 bg-terracotta-dark/15 mix-blend-multiply" />
+      <div className="absolute inset-0 bg-linear-to-t  from-black/70 via-black/20 to-black/10" />
+      {/* <div className="absolute inset-0 bg-linear-to-t  from-charcoal/80 via-charcoal/20 to-charcoal/10" /> */}
+      {/* <div className="absolute inset-0 bg-terracotta-dark/15 mix-blend-multiply" /> */}
+      <div className="absolute inset-0 " />
 
-      {/* <div
-        className="absolute top-0 left-0 z-20 w-full bg-blush"
-        style={{ clipPath: PICADO_CLIP_PATH }}
+      <div
+        className="absolute top-0 left-0 z-20 w-full bg-blush-dark/90 "
+        // style={{ clipPath: PICADO_CLIP_PATH }}
       >
         <img
           src={marcobottom}
           alt=""
           className="mx-auto w-full max-w-2xl rotate-180 select-none"
         />
-      </div> */}
+      </div>
 
       <div className="relative z-10 flex flex-col items-center">
 
@@ -53,19 +55,20 @@ export default function Hero({ datosGenerales }) {
           {nombreNovio}
         </motion.h1>
 
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.9, delay: 0.35 }}
           className="mt-8 h-px w-16 bg-gold/70"
-        />
+        /> */}
 
         <motion.p
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           // className="font-sans text-xs tracking-[0.4em] text-terracotta uppercase"
-          className="font-sans text-xs tracking-[0.4em] text-gold uppercase [text-shadow:0_2px_10px_rgba(0,0,0,0.45)]"
+          // className="font-sans text-xs tracking-[0.4em] text-gold uppercase [text-shadow:0_2px_10px_rgba(0,0,0,0.45)]"
+          className="font-sans text-xs tracking-[0.4em] text-amber-300 uppercase [text-shadow:0_2px_10px_rgba(0,0,0,0.45)]"
         >
           Nos casamos 
         </motion.p>

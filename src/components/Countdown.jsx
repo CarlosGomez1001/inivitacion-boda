@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import marcobottom from "../assets/marcobottom.png";
 
 function getTimeLeft(targetDate) {
   const diff = targetDate.getTime() - Date.now();
@@ -31,6 +32,16 @@ export default function Countdown({ fechaBoda }) {
 
   return (
     <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
+      {/* <div
+              className="absolute top-0 left-0 z-20 w-full bg-blush-dark/20 [clip-path:polygon(0_0,100%_0,100%_100%,0_100%)]"
+              // style={{ clipPath: PICADO_CLIP_PATH }}
+            >
+              <img
+                src={marcobottom}
+                alt=""
+                className="mx-auto w-full max-w-2xl rotate-180 select-none"
+              />
+            </div> */}
       {UNIDADES.map((u, i) => (
         <motion.div
           key={u.key}
