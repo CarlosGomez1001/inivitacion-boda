@@ -56,8 +56,47 @@ curl http://localhost:4000/api/admin/me \
 Debe responder `{"admin": {"sub":..., "email":"admin@invitacion.local","rol":"novio", ...}}`.
 Sin el header `Authorization`, o con un token inválido, debe responder 401.
 
+## RSVP público (Fase 2.3)
+
+Como el importador real del Excel todavía no existe (Fase 2.4), hay un script
+para crear un invitado de prueba con 2 acompañantes:
+
+```bash
+npm run seed:demo
+# Imprime algo como:
+#   token: aB3xQ...
+#   GET  http://localhost:4000/api/invitacion/aB3xQ...
+#   acompañantes: id=2 (Acompañante Uno), id=3 (Acompañante Dos)
+```
+
+Probar que devuelve al principal y sus acompañantes:
+
+```bash
+curl http://localhost:4000/api/invitacion/<token>
+```
+
+Confirmar asistencia (ajusta los ids según lo que imprimió `seed:demo`; el id
+del principal es el más bajo del grupo, usualmente el primero que se creó):
+
+```bash
+curl -X POST http://localhost:4000/api/invitacion/<token>/confirmar \
+  -H "Content-Type: application/json" \
+  -d '{
+    "confirmaciones": [
+      { "invitadoId": 1, "asistencia": "si" },
+      { "invitadoId": 2, "asistencia": "si", "restriccionesAlimentarias": "Vegetariano" },
+      { "invitadoId": 3, "asistencia": "no" }
+    ]
+  }'
+```
+
+Debe devolver el mismo invitado + acompañantes ya con `asistencia` actualizada.
+Probar también casos de error: un token que no existe (debe dar 404) y un
+`invitadoId` que no pertenezca a ese grupo (debe dar 403).
+
 ## Estado
 
 - **Fase 2.1** — Express, conexión a Prisma/Postgres, endpoint `/health`. ✅
 - **Fase 2.2** — Login admin (JWT + bcrypt), middleware `requireAuth`, seed del primer admin. ✅
-- Rutas de negocio (RSVP, gestión de invitados, reportes) se agregan en las Fases 2.3–2.5.
+- **Fase 2.3** — RSVP público (`GET/POST /api/invitacion/:token`), con rate limiting y validación de que cada invitado solo confirme por su propio grupo. ✅
+- Gestión de invitados, importador real y reportes se agregan en las Fases 2.4–2.5.
