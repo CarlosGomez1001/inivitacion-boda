@@ -13,7 +13,7 @@ import Reveal from "./components/Reveal";
 import { buildEventDates } from "./utils/eventLinks";
 import marcobottom from "./assets/marcobottom.png";
 
-function App() {
+function App({ tokenInvitado }) {
   const { datosGenerales, itinerario } = dataBoda;
   const { nombreNovio, nombreNovia, fechaBoda } = datosGenerales;
   const { ceremonia, recepcion, masInformacion } = itinerario;
@@ -103,6 +103,7 @@ function App() {
       <Rsvp
         mensaje={masInformacion.mensajeNovios}
         confirmacion={masInformacion.confirmacionAsistencia}
+        token={tokenInvitado}
       />
 
       <Footer nombreNovio={nombreNovio} nombreNovia={nombreNovia} />
