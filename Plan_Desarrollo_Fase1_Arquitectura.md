@@ -75,7 +75,7 @@ Todo vive en una sola VM de Compute Engine: Nginx como frontera, el frontend com
 
 ## 4. Modelo de datos
 
-Como ya tienes el nombre de cada asistente (no solo un número de pases), la tabla de invitados se vuelve auto-referenciada: cada fila es una persona con nombre propio, y las filas de acompañantes apuntan a su invitado principal vía `invitado_principal_id`. El principal recibe el link con token; desde ahí ve y marca la asistencia de cada acompañante por nombre, uno por uno.
+Cada acompañante existe como su propia fila, ligada al invitado principal por `invitado_principal_id`, y una bandera `es_principal` distingue explícitamente quién es el principal de cada grupo. Al importar el Excel, el texto de "Nombres(s) Acompañantes" se separa (por comas, y también por " y " cuando no hay coma) para crear una fila por cada acompañante nombrado.
 
 ```sql
 CREATE TABLE admins (
@@ -92,23 +92,27 @@ CREATE TABLE grupos (              -- familia, lado (novio/novia), mesa, etc.
 );
 
 CREATE TABLE invitados (
-  id                        SERIAL PRIMARY KEY,
-  nombre_completo           VARCHAR(200) NOT NULL,
-  token_acceso              VARCHAR(40) UNIQUE,            -- nanoid/uuid; solo el invitado principal tiene token
-  invitado_principal_id     INTEGER REFERENCES invitados(id), -- NULL si es el principal; si no, apunta a su principal
-  grupo_id                  INTEGER REFERENCES grupos(id),
-  telefono                  VARCHAR(30),
-  email                     VARCHAR(255),
-  -- Campos de confirmación (null = pendiente), uno por persona
-  asistencia                VARCHAR(10),                    -- 'si' | 'no' | null
+  id                         SERIAL PRIMARY KEY,
+  nombre_completo            VARCHAR(200) NOT NULL,       -- principal: "Nombre de invitado/a"; acompañante: nombre parseado
+  es_principal               BOOLEAN NOT NULL DEFAULT false, -- true = invitado principal, false = acompañante
+  invitado_principal_id      INTEGER REFERENCES invitados(id), -- NULL si es_principal; si no, FK a su principal
+  token_acceso               VARCHAR(40) UNIQUE,          -- solo tienen token las filas con es_principal = true
+  grupo_id                   INTEGER REFERENCES grupos(id), -- "Parentesco", solo aplica a la fila principal
+  pases_declarados           INTEGER,                     -- "# Pases" del Excel, solo fila principal (para validar la importación contra el # de acompañantes parseados)
+  bebes                      INTEGER DEFAULT 0,           -- "Bebés", solo fila principal (informativo)
+  menores                    INTEGER DEFAULT 0,           -- "Menores", solo fila principal (informativo)
+  telefono                   VARCHAR(30),                 -- "WhatsApp", solo fila principal
+  email                      VARCHAR(255),
+  -- Campos de confirmación (null = pendiente), uno por persona (principal y cada acompañante)
+  asistencia                 VARCHAR(10),                  -- 'si' | 'no' | null
   restricciones_alimentarias TEXT,
-  respondido_en             TIMESTAMP,
-  notas_internas            TEXT,
-  creado_en                 TIMESTAMP DEFAULT now()
+  respondido_en              TIMESTAMP,
+  notas_internas             TEXT,                         -- en la fila principal también guarda el texto crudo original de "Nombres(s) Acompañantes" como respaldo de auditoría
+  creado_en                  TIMESTAMP DEFAULT now()
 );
 ```
 
-El `token_acceso` es la base de la "confirmación personalizada por nombre": el invitado principal recibe un link único (`/invitacion/<token>`) que precarga su nombre y la lista de sus acompañantes (por nombre, vía `invitado_principal_id`), y desde ahí confirma la asistencia de cada uno individualmente — en vez de un formulario abierto donde cualquiera escribe cualquier nombre. El número de "pases" ya no se guarda como número suelto: es implícito en la cantidad de filas de acompañantes ligadas al principal.
+El `token_acceso` es la base de la "confirmación personalizada por nombre": el invitado principal recibe un link único (`/invitacion/<token>`) que precarga su nombre y la lista de sus acompañantes (por nombre, vía `invitado_principal_id`), y desde ahí marca la asistencia de cada uno individualmente, incluida la suya propia.
 
 ---
 
@@ -132,7 +136,7 @@ El `token_acceso` es la base de la "confirmación personalizada por nombre": el 
 
 ## 6. Panel de administración (funcionalidades MVP)
 
-Login simple, dashboard con métricas en tiempo real (confirmados/pendientes/declinados, contados por persona) y por grupo familiar, tabla de invitados con búsqueda y edición inline (incluye alta de acompañantes por nombre bajo su principal), generación de link personalizado por invitado principal para enviar manualmente por WhatsApp, carga masiva desde CSV/Excel, y descarga de reportes Excel/PDF para el servicio de catering. La edición visual del contenido de la invitación (mover `dataBoda.js` a la base de datos) queda fuera del MVP — se puede evaluar como iteración futura si de verdad se necesita.
+Login simple, dashboard con métricas en tiempo real (confirmados/pendientes/declinados, contados por persona), tabla de invitados con búsqueda y edición inline (incluye alta de acompañantes por nombre bajo su principal), generación de link personalizado por invitado principal para enviar manualmente por WhatsApp, carga masiva desde CSV/Excel, y descarga de reportes Excel/PDF para el servicio de catering. La edición visual del contenido de la invitación (mover `dataBoda.js` a la base de datos) queda fuera del MVP — se puede evaluar como iteración futura si de verdad se necesita.
 
 ---
 

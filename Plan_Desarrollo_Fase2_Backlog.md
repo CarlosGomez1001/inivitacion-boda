@@ -10,7 +10,8 @@ Este plan cambia de enfoque respecto a la versión anterior: ya no es un backlog
 - **Admin inicial:** usuario de prueba genérico (`admin@invitacion.local` + contraseña temporal generada por mí), a cambiar antes de producción.
 - **Dominio/TLS:** aún no hay dominio, sí IP pública de la VM. Se despliega por HTTP contra la IP; Nginx queda preparado para activar Certbot en cuanto exista un dominio.
 - **Despliegue:** vía Docker (backend + PostgreSQL + Nginx como contenedores, orquestados con `docker-compose`).
-- **Lista de invitados:** ya existe en Excel/CSV con nombres y acompañantes — se usará como caso real para diseñar y probar el importador.
+- **Lista de invitados:** cargada en `src/data/Lista_invitados.xlsx` (91 invitados, columnas: Nombre de invitado/a, # Pases, Bebés, Menores, Parentesco, WhatsApp, Nombres(s) Acompañantes, Save The Date, Invitación, RSVP, #Asistentes) — se usa como caso real para el importador.
+- **Acompañantes:** sí se identifican por nombre. Cada acompañante es su propia fila en `invitados`, ligada al principal vía `invitado_principal_id`, con `es_principal = false`. Al importar, el texto de "Nombres(s) Acompañantes" se separa por comas (y por " y " cuando no hay coma) para generar una fila por cada nombre. El invitado principal ve la lista de sus acompañantes por nombre y marca la asistencia de cada uno individualmente.
 
 ---
 
@@ -52,16 +53,32 @@ Proyect_Invitacion/
 ## 4. Fases de implementación (orden estricto)
 
 ### Fase 2.1 — Andamiaje del backend
-Crear `backend/`, inicializar `package.json`, instalar dependencias (`express`, `prisma`, `@prisma/client`, `jsonwebtoken`, `bcrypt`, `cors`, `dotenv`, `zod`, `express-rate-limit`, `exceljs`, `pdfkit`, `multer`, `csv-parse`, `nanoid`). Escribir `schema.prisma` con el modelo de la Fase 1 (`admins`, `grupos`, `invitados` auto-referenciada). Levantar PostgreSQL local con Docker dentro del entorno de trabajo y correr la primera migración. Endpoint `GET /health` respondiendo 200.
+Crear `backend/`, inicializar `package.json`, instalar dependencias (`express`, `prisma`, `@prisma/client`, `jsonwebtoken`, `bcrypt`, `cors`, `dotenv`, `zod`, `express-rate-limit`, `exceljs`, `pdfkit`, `multer`, `xlsx`, `nanoid`). Escribir `schema.prisma` con el modelo de la Fase 1 (`admins`, `grupos`, `invitados` auto-referenciada con `es_principal`/`invitado_principal_id`). Levantar PostgreSQL local con Docker dentro del entorno de trabajo y correr la primera migración. Endpoint `GET /health` respondiendo 200.
 
 ### Fase 2.2 — Autenticación admin
 `POST /api/admin/login` (bcrypt + JWT), middleware `requireAuth` para proteger `/api/admin/*`, script de seed que crea el usuario admin de prueba.
 
 ### Fase 2.3 — RSVP público
-`GET /api/invitacion/:token` (principal + acompañantes) y `POST /api/invitacion/:token/confirmar` (array de confirmaciones por persona). Validación con `zod` y `express-rate-limit` en estas rutas públicas.
+`GET /api/invitacion/:token` (principal + lista de acompañantes por nombre, con su estado) y `POST /api/invitacion/:token/confirmar` (arreglo `[{ invitado_id, asistencia, restricciones_alimentarias }]`, uno por persona). Validación con `zod` (los `invitado_id` recibidos deben pertenecer a ese principal o ser él mismo) y `express-rate-limit` en estas rutas públicas.
 
 ### Fase 2.4 — Gestión de invitados (admin)
-CRUD de invitados/acompañantes, importador CSV (usando el archivo real que ya tienen como referencia de columnas), generación automática de tokens para principales.
+CRUD de invitados y acompañantes, importador que lee directamente `src/data/Lista_invitados.xlsx` (91 invitados) con este mapeo de columnas:
+
+| Columna del Excel | Campo en BD |
+|---|---|
+| Nombre de invitado/a | `nombre_completo` (fila con `es_principal = true`) |
+| # Pases | `pases_declarados` (solo para validar contra el # de acompañantes parseados) |
+| Bebés | `bebes` |
+| Menores | `menores` |
+| Parentesco | `grupo_id` (se crean/reutilizan `grupos` por cada valor distinto) |
+| WhatsApp | `telefono` |
+| Nombres(s) Acompañantes | se parsea (separador `,` y también `" y "` cuando no hay coma) y cada nombre resultante genera una fila con `es_principal = false` e `invitado_principal_id` apuntando al principal; el texto original se guarda también en `notas_internas` del principal como respaldo |
+
+Las columnas "Save The Date", "Invitación", "RSVP" y "#Asistentes" vienen vacías en el archivo actual — no se importan como datos, ya que ese seguimiento lo reemplaza el propio sistema (`asistencia`, `respondido_en`). Se genera token único solo para las filas principales.
+
+**Caso # Pases > 1 con "Nombres(s) Acompañantes" vacío:** se generan igualmente `# Pases - 1` filas de acompañante, con `nombre_completo` = "Acompañante" (numerado como "Acompañante 1", "Acompañante 2"... si son más de uno, para poder distinguirlos al marcar asistencia). El principal podrá editar después esos nombres genéricos desde el panel admin si los novios los identifican más adelante.
+
+El importador debe reportar (no bloquear) los casos donde el conteo de nombres parseados no coincida con `# Pases` menos 1 y el campo sí tenía texto, para revisión manual — por ejemplo, nombres con "y" dentro del mismo nombre compuesto o placeholders como "Pareja" en vez de un nombre real.
 
 ### Fase 2.5 — Métricas y reportes
 `GET /api/admin/estadisticas`, `GET /api/admin/reportes/excel` (exceljs), `GET /api/admin/reportes/pdf` (pdfkit).
