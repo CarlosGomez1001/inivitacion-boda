@@ -2,15 +2,17 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { prisma } from "./config/db.js";
+import adminRouter from "./routes/admin.js";
 
 const app = express();
 
 app.use(cors({ origin: process.env.CORS_ORIGIN ?? "*" }));
 app.use(express.json());
 
+app.use("/api/admin", adminRouter);
+
 // Rutas de las siguientes fases se montan aquí:
 // app.use("/api/invitacion", invitacionRouter);   // Fase 2.3
-// app.use("/api/admin", adminRouter);              // Fase 2.2, 2.4, 2.5
 
 app.get("/health", async (_req, res) => {
   try {

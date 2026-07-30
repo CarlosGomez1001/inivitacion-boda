@@ -1,6 +1,4 @@
 # routes
 
-Definición de rutas Express. Próximos archivos:
-
-- `invitacion.js` — rutas públicas de RSVP (Fase 2.3): `GET /api/invitacion/:token`, `POST /api/invitacion/:token/confirmar`.
-- `admin.js` — rutas protegidas del panel admin (Fases 2.2, 2.4, 2.5): login, CRUD de invitados, importador, estadísticas, reportes.
+- `admin.js` ✅ (Fase 2.2) — `POST /login`, `GET /me` (protegida). Se le agregan más rutas en las Fases 2.4 (CRUD de invitados, importador) y 2.5 (estadísticas, reportes).
+- `invitacion.js` (pendiente, Fase 2.3) — rutas públicas de RSVP: `GET /api/invitacion/:token`, `POST /api/invitacion/:token/confirmar`.
