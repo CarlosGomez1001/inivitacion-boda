@@ -94,9 +94,54 @@ Debe devolver el mismo invitado + acompañantes ya con `asistencia` actualizada.
 Probar también casos de error: un token que no existe (debe dar 404) y un
 `invitadoId` que no pertenezca a ese grupo (debe dar 403).
 
+## Gestión de invitados e importador real (Fase 2.4)
+
+Importar la lista real desde `src/data/Lista_invitados.xlsx` (no necesita
+`npm install` de nuevo, `xlsx` ya estaba en las dependencias desde la Fase 2.1):
+
+```bash
+npm run import:invitados
+```
+
+Imprime cuántos principales/acompañantes creó y una lista de advertencias
+(filas donde el # de nombres detectados en "Nombres(s) Acompañantes" no
+coincide con "# Pases", para revisar manualmente — no bloquea el import).
+
+Nota: si corres el importador más de una vez, duplica los registros. Si
+necesitas repetirlo limpio, borra los invitados de prueba/anteriores primero
+(o corre `npx prisma migrate reset` desde `backend/` y vuelve a correr
+`npm run seed` antes del importador).
+
+Probar el listado y el CRUD (usa el token de `/api/admin/login`):
+
+```bash
+# Listar (con filtros opcionales: ?estado=pendiente|confirmado|declinado, ?search=..., ?grupoId=...)
+curl http://localhost:4000/api/admin/invitados \
+  -H "Authorization: Bearer <token>"
+
+# Editar un invitado (ejemplo: corregir pasesDeclarados)
+curl -X PUT http://localhost:4000/api/admin/invitados/10 \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"pasesDeclarados": 4}'
+
+# Alta manual de un invitado principal
+curl -X POST http://localhost:4000/api/admin/invitados \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"nombreCompleto":"Invitado Manual","esPrincipal":true,"pasesDeclarados":1}'
+
+# Eliminar un invitado (si es principal, borra en cascada a sus acompañantes)
+curl -X DELETE http://localhost:4000/api/admin/invitados/50 \
+  -H "Authorization: Bearer <token>"
+```
+
+Todas estas rutas responden 401 sin el header `Authorization` correcto.
+
 ## Estado
 
 - **Fase 2.1** — Express, conexión a Prisma/Postgres, endpoint `/health`. ✅
 - **Fase 2.2** — Login admin (JWT + bcrypt), middleware `requireAuth`, seed del primer admin. ✅
 - **Fase 2.3** — RSVP público (`GET/POST /api/invitacion/:token`), con rate limiting y validación de que cada invitado solo confirme por su propio grupo. ✅
-- Gestión de invitados, importador real y reportes se agregan en las Fases 2.4–2.5.
+- **Fase 2.4** — CRUD de invitados (`/api/admin/invitados`) e importador real del Excel (`npm run import:invitados`), con parseo de acompañantes y placeholders cuando el campo viene vacío. ✅
+- Reportes y estadísticas se agregan en la Fase 2.5.

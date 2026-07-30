@@ -1,6 +1,12 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import { login, me } from "../controllers/adminAuthController.js";
+import {
+  listarInvitados,
+  crearInvitado,
+  actualizarInvitado,
+  eliminarInvitado,
+} from "../controllers/invitadosController.js";
 import { requireAuth } from "../middlewares/auth.js";
 
 const router = Router();
@@ -17,7 +23,11 @@ const loginLimiter = rateLimit({
 router.post("/login", loginLimiter, login);
 router.get("/me", requireAuth, me);
 
-// Fase 2.4: CRUD de invitados + importador CSV/Excel
+router.get("/invitados", requireAuth, listarInvitados);
+router.post("/invitados", requireAuth, crearInvitado);
+router.put("/invitados/:id", requireAuth, actualizarInvitado);
+router.delete("/invitados/:id", requireAuth, eliminarInvitado);
+
 // Fase 2.5: GET /estadisticas, /reportes/excel, /reportes/pdf
 
 export default router;

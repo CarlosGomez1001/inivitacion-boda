@@ -9,7 +9,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "seed": "node src/seed.js",
-    "seed:demo": "node src/seedDemoInvitado.js"
+    "seed:demo": "node src/seedDemoInvitado.js",
+    "import:invitados": "node src/importarInvitados.js"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
