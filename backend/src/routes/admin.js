@@ -7,6 +7,11 @@ import {
   actualizarInvitado,
   eliminarInvitado,
 } from "../controllers/invitadosController.js";
+import {
+  obtenerEstadisticas,
+  generarReporteExcel,
+  generarReportePdf,
+} from "../controllers/reportesController.js";
 import { requireAuth } from "../middlewares/auth.js";
 
 const router = Router();
@@ -28,6 +33,8 @@ router.post("/invitados", requireAuth, crearInvitado);
 router.put("/invitados/:id", requireAuth, actualizarInvitado);
 router.delete("/invitados/:id", requireAuth, eliminarInvitado);
 
-// Fase 2.5: GET /estadisticas, /reportes/excel, /reportes/pdf
+router.get("/estadisticas", requireAuth, obtenerEstadisticas);
+router.get("/reportes/excel", requireAuth, generarReporteExcel);
+router.get("/reportes/pdf", requireAuth, generarReportePdf);
 
 export default router;

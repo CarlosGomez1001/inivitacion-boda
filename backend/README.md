@@ -138,10 +138,57 @@ curl -X DELETE http://localhost:4000/api/admin/invitados/50 \
 
 Todas estas rutas responden 401 sin el header `Authorization` correcto.
 
+## Métricas y reportes (Fase 2.5)
+
+Como todavía no hay confirmaciones reales (solo las de prueba de la Fase 2.3,
+que se borraron con el `migrate reset`), primero confirma algún invitado real
+para tener datos que ver en el reporte, por ejemplo:
+
+```bash
+curl http://localhost:4000/api/admin/invitados -H "Authorization: Bearer <token>"
+# toma el "id" de un invitado y de un acompañante suyo de la respuesta anterior
+curl -X POST http://localhost:4000/api/invitacion/<su-token-de-invitado>/confirmar \
+  -H "Content-Type: application/json" \
+  -d '{"confirmaciones":[{"invitadoId":<id>,"asistencia":"si"}]}'
+```
+
+Estadísticas:
+
+```bash
+curl http://localhost:4000/api/admin/estadisticas -H "Authorization: Bearer <token>"
+```
+
+Debe responder algo como
+`{"totalPersonas":..,"totalGruposInvitados":91,"confirmados":..,"declinados":..,"pendientes":..}`.
+
+Reporte Excel (se descarga un archivo):
+
+```bash
+curl http://localhost:4000/api/admin/reportes/excel \
+  -H "Authorization: Bearer <token>" \
+  -o confirmados.xlsx
+```
+
+Reporte PDF:
+
+```bash
+curl http://localhost:4000/api/admin/reportes/pdf \
+  -H "Authorization: Bearer <token>" \
+  -o confirmados.pdf
+```
+
+Abre ambos archivos y confirma que solo aparecen los confirmados (`asistencia = "si"`),
+con su grupo/parentesco y restricciones alimentarias si las tienen.
+
+> Nota para la Fase 2.6: estos endpoints de reporte requieren el header
+> `Authorization`, así que el panel admin debe descargarlos con `fetch()` +
+> blob (no con un `<a href="...">` directo), para poder mandar el token.
+
 ## Estado
 
 - **Fase 2.1** — Express, conexión a Prisma/Postgres, endpoint `/health`. ✅
 - **Fase 2.2** — Login admin (JWT + bcrypt), middleware `requireAuth`, seed del primer admin. ✅
 - **Fase 2.3** — RSVP público (`GET/POST /api/invitacion/:token`), con rate limiting y validación de que cada invitado solo confirme por su propio grupo. ✅
 - **Fase 2.4** — CRUD de invitados (`/api/admin/invitados`) e importador real del Excel (`npm run import:invitados`), con parseo de acompañantes y placeholders cuando el campo viene vacío. ✅
-- Reportes y estadísticas se agregan en la Fase 2.5.
+- **Fase 2.5** — Estadísticas (`/api/admin/estadisticas`) y reportes Excel/PDF de confirmados (`/api/admin/reportes/excel`, `/reportes/pdf`). ✅
+- Integración con el frontend (Fase 2.6) y empaquetado con Docker (Fase 2.7) quedan pendientes.
