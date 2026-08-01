@@ -4,16 +4,48 @@ services:
     container_name: invitacion_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: invitacion
-      POSTGRES_PASSWORD: changeme
-      POSTGRES_DB: invitacion_boda
+      POSTGRES_USER: ${POSTGRES_USER:-invitacion}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-invitacion_boda}
     ports:
-      - "5432:5432"
+      # Solo accesible desde la propia VM/máquina, no expuesto a internet.
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - invitacion
 
-# El servicio "backend" y "nginx" se agregan en la Fase 2.7 (empaquetado
-# completo con Docker para desplegar en la VM de GCloud).
+  backend:
+    build:
+      context: ./backend
+    container_name: invitacion_backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    volumes:
+      # Permite actualizar el Excel de invitados sin reconstruir la imagen.
+      - ./src/data:/app/data:ro
+    depends_on:
+      - postgres
+    networks:
+      - invitacion
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: invitacion_nginx
+    restart: unless-stopped
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./dist:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+    networks:
+      - invitacion
+
+networks:
+  invitacion:
 
 volumes:
   pgdata:
